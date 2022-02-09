@@ -33,10 +33,6 @@ function validWords(){
     })
 }
 
-function excludeQuery(tm){
-    const j = tm.join('|')
-    return `[^${j}]`
-}
 
 
 const ask = (q) => new Promise((res, rej) => {
@@ -44,6 +40,10 @@ const ask = (q) => new Promise((res, rej) => {
 })
 
 
+function excludeQuery(tm){
+    // const j = tm.join('|')
+    return `[^${tm.join('|')}]`
+}
 
 function yesQuery(){
 
@@ -57,8 +57,7 @@ function yesQuery(){
     const ab = about[i]
 
     if(ab?.length){
-      const j = ab.join('|')
-      res[i] = `[^${j}]`
+      res[i] = excludeQuery(ab)
       continue
     }
     res[i] = '.'
@@ -85,6 +84,27 @@ function notPlace(word, approx){
   return about
 }
 
+const mapSerial = (posts, method) => {
+
+    var retd = []
+    return Promise.reduce(posts, (pac, post) =>{
+        retd.push(pac)
+        return method(post)
+    }, 0)
+    .then(val =>{
+        retd.push(val)
+        retd.shift()
+        return retd
+    })
+}
+
+const exDex = async (intersect) => {
+    for(let letter of intersect){
+      const exDex = await ask(`Index of exact match for '${letter}': `)
+      const tint = parseInt(exDex) 
+      exact[tint] = letter
+    }
+}
 
 const w = await red()
 
@@ -97,6 +117,16 @@ async function red(){
   req = [...req, ...approx.split('')]
   const ex = await ask(`exact maching letters: `)
   req = [...req, ...ex.split('')]
+
+  const approxCh = approx.split('')
+  const exactCh = ex.split('')
+  // determine if there ar duplicates
+  const intersect = approxCh.filter(value => exactCh.includes(value))
+
+  // intersect.length && await exDex(intersect)
+  if(intersect.length){
+    await exDex(intersect)
+  }
 
   const both = `${approx}${ex}`
 
