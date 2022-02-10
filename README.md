@@ -10,10 +10,6 @@ to run:
 
     make cheat
 
-### Todo:
-my strategy doesn't really handle double occurances of letters yet,
-need to find a way to indicate that with the text-based ui.
-
 
 example:
 
