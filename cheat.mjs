@@ -1,4 +1,4 @@
-import allWords from './english-words/words_dictionary.json'
+import allWords from './english-words/words_dictionary.json' assert { type: 'json' }
 import readline from 'readline'
 
 const rl = readline.createInterface({
@@ -12,6 +12,8 @@ let omit = []
 let req = []
 let exact = []
 let about = []
+let f = true
+const autoFirst = 'crane'
 
 function countDupes(word){
   const r = {}
@@ -21,7 +23,6 @@ function countDupes(word){
   })
   return Object.values(r).reduce((c,v) => c +v)
 }
-
 
 function validWords(){
   const arr = Object.keys(allWords)
@@ -33,15 +34,13 @@ function validWords(){
     })
 }
 
-
+let matches = validWords()
 
 const ask = (q) => new Promise((res, rej) => {
   rl.question(q, res)
 })
 
-
 function excludeQuery(tm){
-    // const j = tm.join('|')
     return `[^${tm.join('|')}]`
 }
 
@@ -66,7 +65,7 @@ function yesQuery(){
 }
 
 function runSearch(tq){
-  return validWords()
+  return matches
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
@@ -106,13 +105,17 @@ const exDex = async (intersect) => {
     }
 }
 
-const w = await red()
+
+red()
 
 // start with adieu
 // or crane
 async function red(){
 
-  const attempted = await ask(`attempted word: `)
+
+  const addl = f ? `(${autoFirst})` : ''
+  f = false
+  const attempted = (await ask(`attempted word: ${addl}`)) || autoFirst 
   const approx = await ask(`aproximate matches: `)
   req = [...req, ...approx.split('')]
   const ex = await ask(`exact maching letters: `)
