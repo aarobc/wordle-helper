@@ -1,4 +1,4 @@
-import allWords from './english-words/words_dictionary.json'
+import allWords from './english-words/words_dictionary.json' assert {type: 'json'}
 import readline from 'readline'
 
 const rl = readline.createInterface({
