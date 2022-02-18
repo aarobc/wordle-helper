@@ -110,6 +110,9 @@ const w = await red()
 
 // start with adieu
 // or crane
+// or salet
+// or trace
+// or crate
 async function red(){
 
   const attempted = await ask(`attempted word: `)
