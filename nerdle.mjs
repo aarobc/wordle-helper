@@ -79,20 +79,30 @@ function evalIt(eq){
 
 // https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/stringPermutations.md
 console.log('start')
-const validNumbers = "23459"
-const validSymbols = "-";
-const eqs = -2
+const validNumbers = '560'
+const validSymbols = '-/'
+const eqs = -1
 
-const numbers = stringPermutations(validNumbers)
-  .filter(n => n.match(/^9/))
-//
-console.log('numbers', numbers)
-const symbols = stringPermutations(validSymbols)
-const place = thePlacement(numbers, symbols)
-// console.log('place', place)
+function main() {
 
-const ev = place.filter(evalIt)
-console.log('ev', ev)
+  // const numbers = stringPermutations(validNumbers)
+  //   .filter(n => n.match(/^[^0]/))
+  const numbers = potential(validNumbers)
+
+  console.log('numbers', numbers)
+  const symbols = stringPermutations(validSymbols)
+  const place = thePlacement(numbers, symbols)
+    .filter(n => !n.match(/[^0-9]0/))
+
+  console.log('place', place)
+
+  const ev = place.filter(evalIt)
+
+  console.log('ev', ev)
+}
+
+main()
+
 
 
 const ask = (q) => new Promise((res, rej) => {
@@ -134,5 +144,38 @@ async function red(){
 
   const approxCh = approx.split('')
   const exactCh = ex.split('')
+}
+
+function potential(valid, len = 5){
+
+  
+  console.log('valid', valid, valid.includes('5'))
+  const tm = valid.split('')
+    .map(v => parseInt(v))
+    .sort((a,b) => b - a)
+    .filter(v => v)
+
+  const [mm] = tm
+  const [mmin] = tm.reverse()
+  console.log('tm', tm, 'mmin', mmin)
+
+  const tam  = parseInt(`${mm}`.repeat(len))
+  const tmin  = parseInt(mmin + (valid.includes('0') ? '0' : `${mmin}`).repeat(len -1))
+  console.log('tam', tam)
+  console.log('tmin', tmin)
+
+  const tl = []
+
+  const valids = valid.split('')
+  for(let i = tmin; i<=tam; i++){
+    // const inc = valid.includes(`${i}`)
+    const common = `${i}`.split('').every(v => valid.includes(v))
+    const oc = valids.every(v => `${i}`.includes(v))
+    if(common && oc){
+      tl.push(`${i}`)
+    }
+  }
+
+  return tl
 }
 
