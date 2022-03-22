@@ -1,24 +1,30 @@
-// import readline from 'readline'
+import readline from 'readline'
+import {yesQuery, notPlace} from './util.mjs'
 
-// const rl = readline.createInterface({
-//   input: process.stdin,
-//   output: process.stdout
-// })
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 
-// rl.on('close', () => process.exit(0))
+rl.on('close', () => process.exit(0))
 
 let omit = []
 let req = []
 let exact = []
 let about = []
 
+console.log('start')
+const validNumbers = '23678'
+const numNum = 5
+const validSymbols = '-/'
+const eqs = -1
 
 
+// main()
 
-// TODO: more than just permutations
 
 // https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/stringPermutations.md
-const stringPermutations = (str, ld = 0) => {
+function stringPermutations(str, ld = 0){
   if (str.length == 1) return [str]
 
   return str.split('').reduce((acc, letter, i) => {
@@ -69,25 +75,15 @@ function mte(num, sym, lp = -1){
   return validPlacements(fh, sym).map(p => `${p}==${lh}`)
 }
 
-const tig = /^0|[^0-9]0/
 function evalIt(eq){
-  // eq.match(/^0|=0/)
-  // const an = eval(eq)
+const tig = /^0|[^0-9]0/
   return !eq.match(tig) && eval(eq) && eq
-  // return an && eq
 }
 
-// https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/stringPermutations.md
-console.log('start')
-const validNumbers = '560'
-const validSymbols = '-/'
-const eqs = -1
 
 function main() {
 
-  // const numbers = stringPermutations(validNumbers)
-  //   .filter(n => n.match(/^[^0]/))
-  const numbers = potential(validNumbers)
+  const numbers = potential(validNumbers, numNum)
 
   console.log('numbers', numbers)
   const symbols = stringPermutations(validSymbols)
@@ -101,29 +97,30 @@ function main() {
   console.log('ev', ev)
 }
 
-main()
 
 
 
-const ask = (q) => new Promise((res, rej) => {
-  rl.question(q, res)
-})
-
-const mapSerial = (posts, method) => {
-
-    var retd = []
-    return Promise.reduce(posts, (pac, post) =>{
-        retd.push(pac)
-        return method(post)
-    }, 0)
-    .then(val =>{
-        retd.push(val)
-        retd.shift()
-        return retd
-    })
+function ask(q){
+  return new Promise((res, rej) => {
+    rl.question(q, res)
+  })
 }
 
-const exDex = async (intersect) => {
+// const mapSerial = (posts, method) => {
+//
+//     var retd = []
+//     return Promise.reduce(posts, (pac, post) =>{
+//         retd.push(pac)
+//         return method(post)
+//     }, 0)
+//     .then(val =>{
+//         retd.push(val)
+//         retd.shift()
+//         return retd
+//     })
+// }
+
+async function exDex (intersect){
     for(let letter of intersect){
       const exDex = await ask(`Index of exact match for '${letter}': `)
       const tint = parseInt(exDex) 
@@ -133,6 +130,8 @@ const exDex = async (intersect) => {
 
 //    9*8-7=65
 //    0+12/3=4
+
+red()
 
 async function red(){
 

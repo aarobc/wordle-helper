@@ -1,5 +1,6 @@
 import allWords from './english-words/words_dictionary.json' //assert {type: 'json'}
 import readline from 'readline'
+import {yesQuery, determination} from './util.mjs'
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -33,38 +34,6 @@ function validWords(){
     })
 }
 
-
-
-const ask = (q) => new Promise((res, rej) => {
-  rl.question(q, res)
-})
-
-
-function excludeQuery(tm){
-    // const j = tm.join('|')
-    return `[^${tm.join('|')}]`
-}
-
-function yesQuery(){
-
-  const res = []
-  for(let i = 0; i < 5; i++){
-    if(exact[i]){
-      res[i] = exact[i]
-      continue
-    }
-
-    const ab = about[i]
-
-    if(ab?.length){
-      res[i] = excludeQuery(ab)
-      continue
-    }
-    res[i] = '.'
-  }
-  return res.join('')
-}
-
 function runSearch(tq){
   return validWords()
     .filter(w => !omit.some(l => w.includes(l)))
@@ -72,39 +41,18 @@ function runSearch(tq){
     .filter(w => w.match(tq))
 }
 
-function notPlace(word, approx){
-
-  approx.forEach(letter =>{
-    const d = word.indexOf(letter)
-    if(d == -1){
-      return
-    }
-    about[d] = [...about[d] || [], ...letter ] 
-  })
-  return about
+const exDex = async (intersect, exact) => {
+  for(let letter of intersect){
+    const index = await ask(`Index of exact match for '${letter}': `)
+    const tint = parseInt(index) 
+    exact[tint] = letter
+  }
+  return exact
 }
 
-const mapSerial = (posts, method) => {
-
-    var retd = []
-    return Promise.reduce(posts, (pac, post) =>{
-        retd.push(pac)
-        return method(post)
-    }, 0)
-    .then(val =>{
-        retd.push(val)
-        retd.shift()
-        return retd
-    })
-}
-
-const exDex = async (intersect) => {
-    for(let letter of intersect){
-      const exDex = await ask(`Index of exact match for '${letter}': `)
-      const tint = parseInt(exDex) 
-      exact[tint] = letter
-    }
-}
+const ask = (q) => new Promise((res, rej) => {
+  rl.question(q, res)
+})
 
 const w = await red()
 
@@ -123,29 +71,22 @@ async function red(){
 
   const approxCh = approx.split('')
   const exactCh = ex.split('')
+
   // determine if there ar duplicates
   const intersect = approxCh.filter(value => exactCh.includes(value))
 
   // intersect.length && await exDex(intersect)
   if(intersect.length){
-    await exDex(intersect)
+    exact = await exDex(intersect, exact)
   }
 
-  const both = `${approx}${ex}`
+  const tr = determination(attempted, approx, ex, omit, exact, about)
+  omit = tr.omit
+  exact = tr.exact
+  about = tr.about
+  const yq = yesQuery(exact, about, 5)
 
-  const o = attempted.split('').filter(w => !both.includes(w))
-  omit = [...omit, ...o] 
-  // determine the placement of the exact matches
-  const b = attempted.split('').forEach((l, i) => {
-    if(ex.includes(l)){
-      exact[i] = l
-    }
-  })
-
-  const n = notPlace(attempted, approx.split(''))
-
-  const yq = yesQuery()
-
+  console.log('query: ', yq)
   let bf = runSearch(yq)
   console.log('potential matches:', bf)
   red()
