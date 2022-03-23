@@ -1,13 +1,5 @@
 import allWords from './english-words/words_dictionary.json' //assert {type: 'json'}
-import readline from 'readline'
-import {yesQuery, determination} from './util.mjs'
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
-
-rl.on('close', () => process.exit(0))
+import ask from './prompt.mjs'
 
 let omit = []
 let req = []
@@ -50,13 +42,8 @@ const exDex = async (intersect, exact) => {
   return exact
 }
 
-const ask = (q) => new Promise((res, rej) => {
-  rl.question(q, res)
-})
-
 const w = await red()
 
-// start with adieu
 // or crane
 // or salet
 // or trace

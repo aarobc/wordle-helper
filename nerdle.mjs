@@ -1,12 +1,5 @@
-import readline from 'readline'
-import {yesQuery, notPlace} from './util.mjs'
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
-
-rl.on('close', () => process.exit(0))
+import ask from './prompt.mjs'
+import {yesQuery, determination} from './util.mjs'
 
 let omit = []
 let req = []
@@ -98,28 +91,6 @@ function main() {
 }
 
 
-
-
-function ask(q){
-  return new Promise((res, rej) => {
-    rl.question(q, res)
-  })
-}
-
-// const mapSerial = (posts, method) => {
-//
-//     var retd = []
-//     return Promise.reduce(posts, (pac, post) =>{
-//         retd.push(pac)
-//         return method(post)
-//     }, 0)
-//     .then(val =>{
-//         retd.push(val)
-//         retd.shift()
-//         return retd
-//     })
-// }
-
 async function exDex (intersect){
     for(let letter of intersect){
       const exDex = await ask(`Index of exact match for '${letter}': `)
@@ -134,7 +105,6 @@ async function exDex (intersect){
 red()
 
 async function red(){
-
   const attempted = await ask(`attempted equation: `)
   const approx = await ask(`aproximate matches: `)
   req = [...req, ...approx.split('')]
@@ -143,6 +113,25 @@ async function red(){
 
   const approxCh = approx.split('')
   const exactCh = ex.split('')
+
+  // determine if there ar duplicates
+  const intersect = approxCh.filter(value => exactCh.includes(value))
+
+  // intersect.length && await exDex(intersect)
+  if(intersect.length){
+    exact = await exDex(intersect, exact)
+  }
+
+  const tr = determination(attempted, approx, ex, omit, exact, about)
+  omit = tr.omit
+  exact = tr.exact
+  about = tr.about
+  const yq = yesQuery(exact, about, 8)
+
+  console.log('query: ', yq)
+  let bf = runSearch(yq)
+  console.log('potential matches:', bf)
+  red()
 }
 
 function potential(valid, len = 5){
