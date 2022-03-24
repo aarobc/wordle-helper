@@ -1,5 +1,5 @@
 import ask from './prompt.mjs'
-import {yesQuery, determination} from './util.mjs'
+import {yesQuery, determination, exDex} from './util.mjs'
 
 let omit = []
 let req = []
@@ -90,14 +90,13 @@ function main() {
   console.log('ev', ev)
 }
 
+function runSearch({re, omit, exact, about}){
 
-async function exDex (intersect){
-    for(let letter of intersect){
-      const exDex = await ask(`Index of exact match for '${letter}': `)
-      const tint = parseInt(exDex) 
-      exact[tint] = letter
-    }
+  // required to come up with plausable first run
+  const possible = '1234567890'.split('').filter(w => !omit.includes(w))
+  console.log({possible})
 }
+
 
 //    9*8-7=65
 //    0+12/3=4
@@ -126,17 +125,19 @@ async function red(){
   omit = tr.omit
   exact = tr.exact
   about = tr.about
-  const yq = yesQuery(exact, about, 8)
 
-  console.log('query: ', yq)
-  let bf = runSearch(yq)
+  console.log(tr)
+  const re = yesQuery(exact, about, 8)
+    // .replace('=', '==')
+
+  console.log('query: ', re)
+  let bf = runSearch({re, ...tr})
   console.log('potential matches:', bf)
   red()
 }
 
 function potential(valid, len = 5){
 
-  
   console.log('valid', valid, valid.includes('5'))
   const tm = valid.split('')
     .map(v => parseInt(v))
@@ -156,7 +157,6 @@ function potential(valid, len = 5){
 
   const valids = valid.split('')
   for(let i = tmin; i<=tam; i++){
-    // const inc = valid.includes(`${i}`)
     const common = `${i}`.split('').every(v => valid.includes(v))
     const oc = valids.every(v => `${i}`.includes(v))
     if(common && oc){
@@ -167,3 +167,33 @@ function potential(valid, len = 5){
   return tl
 }
 
+// function potential(valid, len = 5){
+//
+//   console.log('valid', valid, valid.includes('5'))
+//   const tm = valid.split('')
+//     .map(v => parseInt(v))
+//     .sort((a,b) => b - a)
+//     .filter(v => v)
+//
+//   const [mm] = tm
+//   const [mmin] = tm.reverse()
+//   console.log('tm', tm, 'mmin', mmin)
+//
+//   const tam  = parseInt(`${mm}`.repeat(len))
+//   const tmin  = parseInt(mmin + (valid.includes('0') ? '0' : `${mmin}`).repeat(len -1))
+//   console.log('tam', tam)
+//   console.log('tmin', tmin)
+//
+//   const tl = []
+//
+//   const valids = valid.split('')
+//   for(let i = tmin; i<=tam; i++){
+//     const common = `${i}`.split('').every(v => valid.includes(v))
+//     const oc = valids.every(v => `${i}`.includes(v))
+//     if(common && oc){
+//       tl.push(`${i}`)
+//     }
+//   }
+//
+//   return tl
+// }

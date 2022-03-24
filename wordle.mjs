@@ -1,5 +1,6 @@
 import allWords from './english-words/words_dictionary.json' //assert {type: 'json'}
 import ask from './prompt.mjs'
+import {yesQuery, determination, exDex} from './util.mjs'
 
 let omit = []
 let req = []
@@ -31,15 +32,6 @@ function runSearch(tq){
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
-}
-
-const exDex = async (intersect, exact) => {
-  for(let letter of intersect){
-    const index = await ask(`Index of exact match for '${letter}': `)
-    const tint = parseInt(index) 
-    exact[tint] = letter
-  }
-  return exact
 }
 
 const w = await red()
