@@ -30,7 +30,7 @@ function notPlace(word, approx, about){
     if(d == -1){
       return
     }
-    console.log('about?', about[d], letter)
+    // console.log('about?', about[d], letter)
     about[d] = [...about[d] || [], ...letter ] 
   })
   return about
@@ -54,15 +54,6 @@ function determineExact(attempted, ex, exact){
 
 }
 
-const exDex = async (intersect, exact) => {
-  for(let letter of intersect){
-    const index = await ask(`Index of exact match for '${letter}': `)
-    const tint = parseInt(index) 
-    exact[tint] = letter
-  }
-  return exact
-}
-
 function determination(attempted, approx, ex, omit, exact, about){
   omit = determineOmit(attempted, approx, ex, omit)
   exact = determineExact(attempted, ex, exact)
@@ -71,4 +62,4 @@ function determination(attempted, approx, ex, omit, exact, about){
   return {omit, exact, about}
 }
 
-export {yesQuery, notPlace, determination, exDex}
+export {yesQuery, notPlace, determination}
