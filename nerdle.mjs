@@ -105,10 +105,10 @@ function equalLocation(posssible, about){
 
 }
 
-function* iterate(nums, syms, eqs){
+function* iterate(nums, symsCb, eqs){
 
   for(let num of nums){
-    console.log('num', num)
+    const syms = symsCb()
     for(let sym of syms){
       console.log('num', num, sym)
       const m = mte(num.join(''), sym, eqs)
@@ -161,7 +161,7 @@ function crs({re, omit, exact, about}){
   for(let i = 4; i <= 6; i++){
     const tov = 7 - i
     const nums = combRep(possible, i)
-    const syms = combRep(possibleS, tov)
+    const syms = () => combRep(possibleS, tov)
 
     const ira = iterate(nums, syms, eqs)
 
@@ -171,14 +171,21 @@ function crs({re, omit, exact, about}){
       if(mb.length > 10){
         break
       }
-      console.log('item', item)
+      // console.log('item', item)
       // l = item
-      evalIt(item) && mb.push(item)
+      const m = item.replace('==', '=').match(re)
+
+      console.log('em', m)
+      break;
+      return
+      evalIt(item) && m && mb.push(item)
       // mb.push(item)
     }
-    console.log('eye', i)
+    // console.log('eye', i)
     // console.log('last', l)
   }
+
+  console.log('re', re)
   return mb
 }
 

@@ -20,29 +20,4 @@ function combRep(arr, l) {
   return f(0, 0)                      
 }
 
-// const res = combRep('-+*/'.split(''), 5)
-// console.log('np', res.next())
-// console.log('np', res.next())
-//
-// for(let tt of res){
-//   console.log('tt', tt)
-// }
-
-function* possibleSym(p){
-  console.log('yeet')
-  for(let i = 1; i <= p.length; i++){
-    console.log('pos', i)
-    // const res = combRep('-+*/'.split(''), 1)
-    yield * combRep('-+*/'.split(''), i)
-  }
-}
-
 export {combRep}
-// const ia = possible('-+*/')
-// console.log('np', ia.next())
-// console.log('np', ia);
-
-// for(let tt of ia){
-//   console.log('tt', tt)
-// }
-//
