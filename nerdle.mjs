@@ -112,7 +112,7 @@ function* iterate(numsCb, symsCb, eqs){
     const syms = symsCb()
     for(let sym of syms){
       // console.log('num', num, sym)
-      const m = mte(num.join(''), sym, eqs)
+      const m = mte(num.join(''), sym, eqs).filter(item => item)
       for (let v of m){
         yield v
       }
@@ -163,27 +163,39 @@ function crs({re, omit, exact, about}){
     const tov = 7 - i
     const nums = () => combRep(possible, i)
     const syms = () => combRep(possibleS, tov)
+    console.log({nums: i, syms: tov})
 
     const ira = iterate(nums, syms, eqs)
 
     let l = ''
+    let count = 0
     for(let item of ira){
       // console.log({item})
-      if(mb.length > 10){
+      count++
+      if(mb.length > 100){
+        console.log('tem', item)
         break
       }
-      // console.log('item', item)
-      // l = item
-      const m = item.replace('==', '=').match(`/${re}/`)
+      l = item
 
-      console.log('em', m)
-      break;
-      return
-      evalIt(item) && m && mb.push(item)
+      re = '9[^+].[^-].=.[^54]'
+      const m = item
+        .replace('==', '=')
+        .match(re)
+
+      // if(m){
+      //   console.log('em', m)
+      // }
+      // break;
+      // return
+      m && evalIt(item) && mb.push(item)
+      // evalIt(item) && m && mb.push(item)
+      // evalIt(item) && mb.push(item)
       // mb.push(item)
     }
+    console.log('count', count)
     // console.log('eye', i)
-    // console.log('last', l)
+    console.log('last', l)
   }
 
   console.log('re', re)
