@@ -105,12 +105,13 @@ function equalLocation(posssible, about){
 
 }
 
-function* iterate(nums, symsCb, eqs){
+function* iterate(numsCb, symsCb, eqs){
 
+  const nums = numsCb()
   for(let num of nums){
     const syms = symsCb()
     for(let sym of syms){
-      console.log('num', num, sym)
+      // console.log('num', num, sym)
       const m = mte(num.join(''), sym, eqs)
       for (let v of m){
         yield v
@@ -160,7 +161,7 @@ function crs({re, omit, exact, about}){
   // const p = potent(omit, 4, 6)
   for(let i = 4; i <= 6; i++){
     const tov = 7 - i
-    const nums = combRep(possible, i)
+    const nums = () => combRep(possible, i)
     const syms = () => combRep(possibleS, tov)
 
     const ira = iterate(nums, syms, eqs)
@@ -173,7 +174,7 @@ function crs({re, omit, exact, about}){
       }
       // console.log('item', item)
       // l = item
-      const m = item.replace('==', '=').match(re)
+      const m = item.replace('==', '=').match(`/${re}/`)
 
       console.log('em', m)
       break;
