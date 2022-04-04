@@ -1,6 +1,6 @@
 import ask from './prompt.mjs'
 import {yesQuery, determination} from './util.mjs'
-import {combRep} from './comb.mjs'
+import {allPossible, stringPermutations} from './comb.mjs'
 
 let omit = []
 let req = []
@@ -17,19 +17,6 @@ const eqs = -2
 // 9*8-7=65
 // main()
 red()
-
-
-// https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/stringPermutations.md
-function stringPermutations(str, ld = 0){
-  if (str.length == 1) return [str]
-
-  return str.split('').reduce((acc, letter, i) => {
-      const trs = str.slice(0, i) + str.slice(i + 1)
-      const tp = stringPermutations(trs, ld + 1).map(val => letter + val)
-
-      return [ ...acc, ...tp]
-  }, [])
-}
 
 function validPlacements(num, [ sym, ...osim]){
 
@@ -107,98 +94,64 @@ function equalLocation(posssible, about){
 
 function* iterate(numsCb, symsCb, eqs){
 
+  let numCounter = 0
+  let symCounter = 0
+  let totc = 0
   const nums = numsCb()
   for(let num of nums){
+    numCounter++
     const syms = symsCb()
     for(let sym of syms){
+      symCounter++
       // console.log('num', num, sym)
       const m = mte(num.join(''), sym, eqs).filter(item => item)
       for (let v of m){
+        totc++
         yield v
       }
     }
   }
+  console.log({numCounter, symCounter, totc})
 }
-
-// function runSearch({re, omit, exact, about}){
-//
-//   // required to come up with plausable first run
-//   const possible = '1234567890'.split('').filter(w => !omit.includes(w))
-//   const possibleS = '-+*/'.split('').filter(w => !omit.includes(w))
-//
-//   console.log('possible symbols', possibleS)
-//   console.log('possible numbers', possible)
-//
-//   const eqs = equalLocation(possible, about)
-//   const p = potent(omit, 4, 6)
-//   const syms = possibleSym(possibleS)
-//
-//   const mb = []
-//   const ira = iterate(p, syms, eqs)
-//   for(let item of ira){
-//     console.log({item})
-//     if(mb.length > 10){
-//       break
-//     }
-//     mb.push(item)
-//   }
-//   // if we know the exact eqs:
-//   // let eqs = exact[5] == '=' ? -2 : -1
-//   console.log({possible, eqs})
-// }
 
 function crs({re, omit, exact, about}){
 
   // required to come up with plausable first run
-  const possible = '1234567890'.split('').filter(w => !omit.includes(w))
-  const possibleS = '-+*/'.split('').filter(w => !omit.includes(w))
+  const possible = '1234567890'.split('')
+    .filter(w => !omit.includes(w))
+  const possibleS = '-+*/'.split('')
+    .filter(w => !omit.includes(w))
 
   console.log('possible symbols', possibleS)
   console.log('possible numbers', possible)
+  console.log('required values', about)
 
   const mb = []
   const eqs = equalLocation(possible, about)
   // const p = potent(omit, 4, 6)
   for(let i = 4; i <= 6; i++){
     const tov = 7 - i
-    const nums = () => combRep(possible, i)
-    const syms = () => combRep(possibleS, tov)
-    console.log({nums: i, syms: tov})
+    const nums = () => allPossible(possible, i)
+    const syms = () => allPossible(possibleS, tov)
 
     const ira = iterate(nums, syms, eqs)
 
-    let l = ''
-    let count = 0
     for(let item of ira){
-      // console.log({item})
-      count++
-      if(mb.length > 100){
+      if(mb.length > 99){
         console.log('tem', item)
         break
       }
-      l = item
 
-      re = '9[^+].[^-].=.[^54]'
+      const itv = about.every(sym => item.includes(sym))
+
       const m = item
         .replace('==', '=')
         .match(re)
 
-      // if(m){
-      //   console.log('em', m)
-      // }
-      // break;
-      // return
-      m && evalIt(item) && mb.push(item)
-      // evalIt(item) && m && mb.push(item)
-      // evalIt(item) && mb.push(item)
-      // mb.push(item)
+      m && evalIt(item) && itv && mb.push(item)
     }
-    console.log('count', count)
-    // console.log('eye', i)
-    console.log('last', l)
   }
 
-  console.log('re', re)
   return mb
 }
 
@@ -231,7 +184,6 @@ async function red(){
   // determine if there ar duplicates
   const intersect = approxCh.filter(value => exactCh.includes(value))
 
-  // intersect.length && await exDex(intersect)
   if(intersect.length){
     exact = await exDex(intersect, exact)
   }
@@ -289,21 +241,6 @@ function* potent(omit, min=null, max=5){
 
   // return tl
 }
-
-// function* possibleSym(p){
-//   console.log('yeet')
-//   for(let i = 1; i <= p.length; i++){
-//     yield * combRep(p, i)
-//   }
-// }
-//
-// function* possibleNum(p){
-//   console.log('yeet')
-//   for(let i = 1; i <= p.length; i++){
-//     yield * combRep('-+*/'.split(''), i)
-//   }
-// }
-// potentialSymbols()
 
 function potential(valid, len = 5){
 
