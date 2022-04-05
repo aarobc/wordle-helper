@@ -1,5 +1,5 @@
 import ask from './prompt.mjs'
-import {yesQuery, determination} from './util.mjs'
+import {yesQuery, determination, exDex} from './util.mjs'
 import {allPossible, stringPermutations} from './comb.mjs'
 
 let omit = []
@@ -53,14 +53,13 @@ function thePlacement(nums, syms, eqs){
 }
 
 function mte(num, sym, lp = -1){
-  // console.log('num, sym', num, sym)
   const lh = num.slice(lp)
   const fh =  num.slice(0, lp)
   return validPlacements(fh, sym).map(p => `${p}==${lh}`)
 }
 
 function evalIt(eq){
-const tig = /^0|[^0-9]0/
+  const tig = /^0|[^0-9]0/
   return !eq.match(tig) && eval(eq) && eq
 }
 
@@ -84,7 +83,7 @@ function main() {
 function equalLocation(posssible, about){
   const eqd = exact.indexOf('=')
   if(eqd != -1){
-   return -7 + eqd 
+    return -7 + eqd 
   }
 
   const abt = about.indexOf('=')
@@ -94,24 +93,17 @@ function equalLocation(posssible, about){
 
 function* iterate(numsCb, symsCb, eqs){
 
-  let numCounter = 0
-  let symCounter = 0
-  let totc = 0
   const nums = numsCb()
   for(let num of nums){
-    numCounter++
     const syms = symsCb()
     for(let sym of syms){
-      symCounter++
       // console.log('num', num, sym)
       const m = mte(num.join(''), sym, eqs).filter(item => item)
       for (let v of m){
-        totc++
         yield v
       }
     }
   }
-  console.log({numCounter, symCounter, totc})
 }
 
 function crs({re, omit, exact, about}){
@@ -122,13 +114,13 @@ function crs({re, omit, exact, about}){
   const possibleS = '-+*/'.split('')
     .filter(w => !omit.includes(w))
 
+  console.log('query: ', re)
   console.log('possible symbols', possibleS)
   console.log('possible numbers', possible)
   console.log('required values', about)
 
   const mb = []
   const eqs = equalLocation(possible, about)
-  // const p = potent(omit, 4, 6)
   for(let i = 4; i <= 6; i++){
     const tov = 7 - i
     const nums = () => allPossible(possible, i)
@@ -137,45 +129,29 @@ function crs({re, omit, exact, about}){
     const ira = iterate(nums, syms, eqs)
 
     for(let item of ira){
-      if(mb.length > 99){
-        console.log('tem', item)
+      if(mb.length > 10){
         break
       }
 
       const itv = about.every(sym => item.includes(sym))
+      const m = item.replace('==', '=').match(re)
 
-      const m = item
-        .replace('==', '=')
-        .match(re)
-
-      m && evalIt(item) && itv && mb.push(item)
+      if(evalIt(item) && m && itv){ mb.push(item) }
     }
   }
 
   return mb
 }
 
-
 //    9*8-7=65
 //    0+12/3=4
-
-const exDex = async (intersect, exact) => {
-  for(let letter of intersect){
-    const index = await ask(`Index of exact match for '${letter}': `)
-    const tint = parseInt(index) 
-    exact[tint] = letter
-  }
-  return exact
-}
-
-
 async function red(){
   const attempted = (await ask(`attempted equation: ${f}`)) || f
   f = ''
 
-  const approx = await ask(`aproximate matches: `)|| '-5'  
+  const approx = await ask(`aproximate matches: `)
   req = [...req, ...approx.split('')]
-  const ex = await ask(`exact matches: `) || '9='
+  const ex = await ask(`exact matches: `)
   req = [...req, ...ex.split('')]
 
   const approxCh = approx.split('')
@@ -185,7 +161,7 @@ async function red(){
   const intersect = approxCh.filter(value => exactCh.includes(value))
 
   if(intersect.length){
-    exact = await exDex(intersect, exact)
+    exact = await exDex(intersect, exact, ask)
   }
 
   const tr = determination(attempted, approx, ex, omit, exact, about)
@@ -193,53 +169,11 @@ async function red(){
   exact = tr.exact
   about = tr.about
 
-  const re = yesQuery(exact, about, 8)
+  const re = yesQuery(exact, about, 8).replace('*', '\\*')
 
-  console.log('query: ', re)
   let bf = crs({re, ...tr})
   console.log('potential matches:', bf)
   red()
-}
-
-function* potent(omit, min=null, max=5){
-
-  min ??= max
-  const possible = '1234567890'.split('').filter(w => !omit.includes(w))
-
-  console.log('valid', possible, possible.includes('5'))
-  const tm = possible
-    .map(v => parseInt(v))
-    .sort((a,b) => b - a)
-    .filter(v => v)
-
-  const [mm] = tm
-  const [mmin] = tm.reverse()
-  console.log('tm', tm, 'mmin', mmin)
-
-  const tam  = parseInt(`${mm}`.repeat(max))
-  const tmin  = parseInt(mmin + (possible.includes('0') ? '0' : `${mmin}`).repeat(min -1))
-  console.log('tam', tam)
-  console.log('tmin', tmin)
-
-  const tl = []
-
-  // const valids = possible
-  for(let i = tmin; i<=tam; i++){
-    const exclude = `${i}`.split('').some(v => omit.includes(v))
-    // console.log({exclude, omit, i})
-    if(exclude){
-      continue
-    }
-    // break
-    yield i
-    // break
-    // const oc = valids.every(v => `${i}`.includes(v))
-    // if(common && oc){
-    //   tl.push(`${i}`)
-    // }
-  }
-
-  // return tl
 }
 
 function potential(valid, len = 5){

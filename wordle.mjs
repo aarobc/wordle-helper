@@ -56,7 +56,7 @@ async function red(){
 
   // intersect.length && await exDex(intersect)
   if(intersect.length){
-    exact = await exDex(intersect, exact)
+    exact = await exDex(intersect, exact, ask)
   }
 
   const tr = determination(attempted, approx, ex, omit, exact, about)
