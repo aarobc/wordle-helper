@@ -117,7 +117,8 @@ function crs({re, omit, exact, about}){
   console.log('query: ', re)
   console.log('possible symbols', possibleS)
   console.log('possible numbers', possible)
-  console.log('required values', about)
+  console.log('required values ', about)
+  console.log('exact values    ', exact)
 
   const mb = []
   const eqs = equalLocation(possible, about)
