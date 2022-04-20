@@ -28,10 +28,13 @@ function validWords(){
 }
 
 function runSearch(tq){
-  return validWords()
+  const valid = validWords()
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
+
+  const f = buildFrequency(valid)
+  return frequency(f, valid)
 }
 
 const w = await red()
@@ -71,3 +74,32 @@ async function red(){
   red()
 }
 
+
+function rating(word, bf){
+    return word.split('').reduce((carry, v) => {
+      // we want closest to 0
+      const r = Math.abs(0.5 - bf[v].pct)
+      return carry + r
+    }, 0)
+
+}
+
+function frequency(f, set){
+
+  const tfs = set.sort((a, b) => {
+    const rata = rating(a, f)
+    const ratb = rating(b, f)
+    return rata > ratb ? 1 : -1
+  })
+  return tfs
+}
+
+function buildFrequency(set){
+  const alpha = Array.from(Array(26)).map((e, i) => String.fromCharCode(i + 97))
+
+  return alpha.reduce((carry, value) => {
+    const match = set.filter(word => word.includes(value))
+    carry[value] = {qty: match.length, pct: (match.length / set.length).toPrecision(3)}
+    return carry
+  }, {})
+}
