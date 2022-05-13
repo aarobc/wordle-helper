@@ -20,11 +20,6 @@ function countDupes(word){
 function validWords(){
   const arr = Object.keys(allWords)
   return arr.filter(w => w.length == 5)
-    .sort((a,b) => {
-      const ay = countDupes(a)
-      const by = countDupes(b)
-      return ay < by ? -1 : 1
-    })
 }
 
 function runSearch(tq){
@@ -35,6 +30,12 @@ function runSearch(tq){
 
   const f = buildFrequency(valid)
   return frequency(f, valid)
+    .sort((a,b) => {
+      const ay = countDupes(a)
+      const by = countDupes(b)
+      return Math.sign(ay - by)
+      // return ay < by ? -1 : 1
+    })
 }
 
 const w = await red()
