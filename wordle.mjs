@@ -1,6 +1,6 @@
-import allWords from './english-words/words_dictionary.json' //assert {type: 'json'}
 import ask from './prompt.mjs'
 import {yesQuery, determination, exDex} from './util.mjs'
+import fs from 'fs/promises'
 
 let omit = []
 let req = []
@@ -18,12 +18,12 @@ function countDupes(word){
 
 
 function validWords(){
-  const arr = Object.keys(allWords)
-  return arr.filter(w => w.length == 5)
+  return fs.readFile('./wordle-list/words', { encoding: 'utf8' })
+    .then(data => data.split('\n'))
 }
 
-function runSearch(tq){
-  const valid = validWords()
+async function runSearch(tq){
+  const valid = (await validWords())
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
@@ -34,7 +34,6 @@ function runSearch(tq){
       const ay = countDupes(a)
       const by = countDupes(b)
       return Math.sign(ay - by)
-      // return ay < by ? -1 : 1
     })
 }
 
@@ -70,7 +69,7 @@ async function red(){
   const yq = yesQuery(exact, about, 5)
 
   console.log('query: ', yq)
-  let bf = runSearch(yq)
+  let bf = await runSearch(yq)
   console.log('potential matches:', bf)
   red()
 }
