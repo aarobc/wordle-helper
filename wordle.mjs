@@ -37,7 +37,7 @@ async function runSearch(tq){
     })
 }
 
-const w = await red()
+red()
 
 // or crane
 // or salet
