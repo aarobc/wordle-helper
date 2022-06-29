@@ -7,37 +7,55 @@ let req = []
 let exact = []
 let about = []
 
-function countDupes(word){
-  const r = {}
-  word.split('').forEach(l => {
-    const ev = r[l] ?? -1 
-    r[l] = ev + 1
-  })
-  return Object.values(r).reduce((c,v) => c +v)
-}
-
-
 function validWords(){
   return fs.readFile('./wordle-list/words', { encoding: 'utf8' })
     .then(data => data.split('\n'))
 }
 
-async function runSearch(tq){
-  const valid = (await validWords())
+function wordFrequency(words){
+  return words.reduce((carry, word, d) => {
+    // build query string for existing word list
+    const q = word.split('')
+      .map((l, i) => {
+        const ph = '.....'.split('')
+        ph[i] = l
+        return ph.join('')
+      })
+      .join('|')
+    // omit the current word from the search
+    const ttw = [...words.slice(0,d), ...words.slice(d+1)]
+    const ml = ttw.filter(w => w.match(q))
+
+    const pct = ml.length && (ml.length / ttw.length)
+
+    return [...carry, {
+      word,
+      len: ml.length,
+      ttw: ttw.length,
+      q,
+      pct,
+      dist: ml.length ? Math.abs(0.5 - pct) : 1
+    }]
+  }, [])
+}
+
+function sort(words){
+  const freq = wordFrequency(words)
+    .sort((a, b) => {
+      return a.dist > b.dist ? 1 : -1
+    })
+
+  return freq.map(item => item.word)
+}
+
+function filter(words, tq){
+  return words
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
-
-  const f = buildFrequency(valid)
-  return frequency(f, valid)
-    .sort((a,b) => {
-      const ay = countDupes(a)
-      const by = countDupes(b)
-      return Math.sign(ay - by)
-    })
 }
 
-red()
+await red()
 
 // or crane
 // or salet
@@ -69,37 +87,10 @@ async function red(){
   const yq = yesQuery(exact, about, 5)
 
   console.log('query: ', yq)
-  let bf = await runSearch(yq)
-  console.log('potential matches:', bf)
+  const vw = await validWords()
+  let bf = filter(vw, yq)
+  let sorted = sort(bf)
+  console.log('potential matches:', sorted)
+
   red()
-}
-
-
-function rating(word, bf){
-    return word.split('').reduce((carry, v) => {
-      // we want closest to 0
-      const r = Math.abs(0.5 - bf[v].pct)
-      return carry + r
-    }, 0)
-
-}
-
-function frequency(f, set){
-
-  const tfs = set.sort((a, b) => {
-    const rata = rating(a, f)
-    const ratb = rating(b, f)
-    return rata > ratb ? 1 : -1
-  })
-  return tfs
-}
-
-function buildFrequency(set){
-  const alpha = Array.from(Array(26)).map((e, i) => String.fromCharCode(i + 97))
-
-  return alpha.reduce((carry, value) => {
-    const match = set.filter(word => word.includes(value))
-    carry[value] = {qty: match.length, pct: (match.length / set.length).toPrecision(3)}
-    return carry
-  }, {})
 }

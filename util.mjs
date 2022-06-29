@@ -45,13 +45,12 @@ function determineOmit(attempted, approx, ex, omit){
 
 function determineExact(attempted, ex, exact){
   // determine the placement of the exact matches
-  const b = attempted.split('').forEach((l, i) => {
+  attempted.split('').forEach((l, i) => {
     if(ex.includes(l)){
       exact[i] = l
     }
   })
   return exact
-
 }
 
 const exDex = async (intersect, exact, ask) => {
