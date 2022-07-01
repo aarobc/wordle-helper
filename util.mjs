@@ -23,8 +23,9 @@ function excludeQuery(tm){
     return `[^${tm.join('|')}]`
 }
 
-function notPlace(word, approx, about){
+function notPlace(word, approx){
 
+  const about = []
   approx.split('').forEach(letter =>{
     const d = word.indexOf(letter)
     if(d == -1){
@@ -36,24 +37,26 @@ function notPlace(word, approx, about){
   return about
 }
 
-function determineOmit(attempted, approx, ex, omit){
+function determineOmit(attempted, approx, ex){
   const both = `${approx}${ex}`
-
-  const o = attempted.split('').filter(w => !both.includes(w))
-  return [...omit, ...o] 
+  return attempted.split('').filter(w => !both.includes(w))
 }
 
 function determineExact(attempted, ex, exact){
   // determine the placement of the exact matches
   attempted.split('').forEach((l, i) => {
     if(ex.includes(l)){
+      // hmm, what if it's not the first match tho?
+      const re = new RegExp(l)
+      ex = ex.replace(re, '')
       exact[i] = l
     }
   })
   return exact
 }
 
-const exDex = async (intersect, exact, ask) => {
+const exDex = async (intersect, ask) => {
+  const exact = []
   for(let letter of intersect){
     const index = await ask(`Index of exact match for '${letter}': `)
     const tint = parseInt(index) 
@@ -62,10 +65,10 @@ const exDex = async (intersect, exact, ask) => {
   return exact
 }
 
-function determination(attempted, approx, ex, omit, exact, about){
-  omit = determineOmit(attempted, approx, ex, omit)
+function determination(attempted, approx = [], ex = [], exact = []){
+  const omit = determineOmit(attempted, approx, ex)
   exact = determineExact(attempted, ex, exact)
-  about = notPlace(attempted, approx, about)
+  const about = notPlace(attempted, approx)
 
   return {omit, exact, about}
 }

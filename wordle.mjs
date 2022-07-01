@@ -2,10 +2,6 @@ import ask from './prompt.mjs'
 import {yesQuery, determination, exDex} from './util.mjs'
 import fs from 'fs/promises'
 
-let omit = []
-let req = []
-let exact = []
-let about = []
 
 function validWords(){
   return fs.readFile('./wordle-list/words', { encoding: 'utf8' })
@@ -48,24 +44,26 @@ function sort(words){
   return freq.map(item => item.word)
 }
 
-function filter(words, tq){
+function filter(words, tq, omit, req){
   return words
     .filter(w => !omit.some(l => w.includes(l)))
     .filter(w => req.every(l => w.includes(l)))
     .filter(w => w.match(tq))
 }
 
-await red()
+red()
 
 // or crane
 // or salet
 // or trace
 // or crate
-async function red(){
+async function red(list){
+  // first step of the loop
+  list ||= await validWords()
 
   const attempted = await ask(`attempted word: `)
   const approx = await ask(`aproximate matches: `)
-  req = [...req, ...approx.split('')]
+  let req = approx.split('')
   const ex = await ask(`exact maching letters: `)
   req = [...req, ...ex.split('')]
 
@@ -73,24 +71,21 @@ async function red(){
   const exactCh = ex.split('')
 
   // determine if there ar duplicates
-  const intersect = approxCh.filter(value => exactCh.includes(value))
+  const intersectApprox = approxCh.filter(value => exactCh.includes(value))
 
-  // intersect.length && await exDex(intersect)
-  if(intersect.length){
-    exact = await exDex(intersect, exact, ask)
+  let exactAddl = []
+  if(intersectApprox.length){
+    exactAddl = await exDex(intersectApprox, exact, ask)
   }
 
-  const tr = determination(attempted, approx, ex, omit, exact, about)
-  omit = tr.omit
-  exact = tr.exact
-  about = tr.about
+  let {omit, about, exact} = determination(attempted, approx, ex, exactAddl)
   const yq = yesQuery(exact, about, 5)
 
   console.log('query: ', yq)
-  const vw = await validWords()
-  let bf = filter(vw, yq)
+
+  let bf = filter(list, yq, omit, req)
   let sorted = sort(bf)
   console.log('potential matches:', sorted)
 
-  red()
+  return red(sorted)
 }
