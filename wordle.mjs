@@ -2,7 +2,6 @@ import ask from './prompt.mjs'
 import {yesQuery, determination, exDex} from './util.mjs'
 import fs from 'fs/promises'
 
-
 function validWords(){
   return fs.readFile('./wordle-list/words', { encoding: 'utf8' })
     .then(data => data.split('\n'))
@@ -22,7 +21,11 @@ function wordFrequency(words){
     const ttw = [...words.slice(0,d), ...words.slice(d+1)]
     const ml = ttw.filter(w => w.match(q))
 
-    const pct = ml.length && (ml.length / ttw.length)
+    let pct = ml.length && (ml.length / ttw.length)
+
+    // hack to derank words with dupes
+    const dupes = countDupes(word)
+    pct = dupes ? pct + 1 : pct
 
     return [...carry, {
       word,
@@ -88,4 +91,13 @@ async function red(list){
   console.log('potential matches:', sorted)
 
   return red(sorted)
+}
+
+function countDupes(word){
+  const r = {}
+  word.split('').forEach(l => {
+    const ev = r[l] ?? -1
+    r[l] = ev + 1
+  })
+  return Object.values(r).reduce((c,v) => c +v)
 }
